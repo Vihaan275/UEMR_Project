@@ -1,0 +1,140 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* user SOS */
+.user {
+  background: #14080a;
+  color: #f4e8ea;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.user-wrap {
+  width: min(420px, 100%);
+  text-align: center;
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #ff6b7a;
+  margin-bottom: 10px;
+}
+
+h1 { font-size: 40px; font-weight: 700; }
+
+.sub {
+  margin: 12px 0 36px;
+  color: #c9b0b4;
+  line-height: 1.4;
+}
+
+#sos {
+  width: 180px;
+  height: 180px;
+  border: 0;
+  border-radius: 50%;
+  background: #e10600;
+  color: white;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 0 0 12px rgba(225, 6, 0, 0.25);
+}
+
+#sos:hover { background: #c10500; }
+#sos:disabled { opacity: 0.7; cursor: default; }
+
+.status {
+  min-height: 48px;
+  margin-top: 28px;
+  color: #c9b0b4;
+  line-height: 1.4;
+}
+
+.status.ok { color: #7dffa3; }
+
+/* dispatch */
+.dispatch {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+  background: #111;
+  color: #eee;
+}
+
+aside {
+  padding: 20px 16px;
+  border-right: 1px solid #2a2a2a;
+  overflow: auto;
+}
+
+aside h1 { font-size: 22px; margin-bottom: 6px; }
+
+.hint {
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+#list { list-style: none; }
+
+#list li {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #1c1c1c;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+}
+
+#list li.active { outline: 2px solid #e10600; }
+#list li.empty { color: #777; cursor: default; }
+
+#list strong { color: #ff6b7a; font-size: 12px; letter-spacing: 0.08em; }
+#list span { font-size: 15px; }
+#list small { color: #999; }
+
+.map-pane { position: relative; }
+#map { height: 100%; }
+
+.bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 500;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#detail { font-size: 14px; color: #ddd; }
+
+.nav {
+  flex-shrink: 0;
+  background: #e10600;
+  color: white;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .dispatch { grid-template-columns: 1fr; grid-template-rows: 40% 1fr; }
+}

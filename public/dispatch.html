@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dispatch</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="dispatch">
+  <aside>
+    <h1>Dispatch</h1>
+    <p class="hint">Incoming SOS alerts. Newest first.</p>
+    <ul id="list"></ul>
+  </aside>
+  <section class="map-pane">
+    <div id="map"></div>
+    <div class="bar" id="bar">
+      <p id="detail">Waiting for an SOS…</p>
+      <a id="nav" class="nav" hidden href="#" target="_blank" rel="noopener">Get directions</a>
+    </div>
+  </section>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const listEl = document.getElementById("list");
+    const detail = document.getElementById("detail");
+    const nav = document.getElementById("nav");
+
+    const map = L.map("map").setView([39.5, -98.35], 4);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap",
+    }).addTo(map);
+
+    let marker;
+    let selectedId = null;
+    let lastIds = "";
+
+    function mapsUrl(lat, lng) {
+      return "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng;
+    }
+
+    function when(iso) {
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+    }
+
+    function showAlert(a) {
+      selectedId = a.id;
+      if (!marker) marker = L.marker([a.lat, a.lng]).addTo(map);
+      else marker.setLatLng([a.lat, a.lng]);
+      map.setView([a.lat, a.lng], 16);
+
+      const acc = a.accuracy ? " · ~" + Math.round(a.accuracy) + "m accuracy" : "";
+      detail.textContent = a.lat.toFixed(5) + ", " + a.lng.toFixed(5) + acc + " · " + when(a.time);
+      nav.href = mapsUrl(a.lat, a.lng);
+      nav.hidden = false;
+
+      [...listEl.children].forEach((li) => {
+        li.classList.toggle("active", li.dataset.id === a.id);
+      });
+    }
+
+    async function refresh() {
+      try {
+        const alerts = await fetch("/api/alerts").then((r) => r.json());
+        const ids = alerts.map((a) => a.id).join(",");
+        if (ids === lastIds) return;
+        lastIds = ids;
+
+        listEl.innerHTML = "";
+        if (!alerts.length) {
+          listEl.innerHTML = "<li class='empty'>No alerts yet</li>";
+          return;
+        }
+
+        alerts.forEach((a) => {
+          const li = document.createElement("li");
+          li.dataset.id = a.id;
+          li.innerHTML =
+            "<strong>SOS</strong><span>" + when(a.time) + "</span>" +
+            "<small>" + a.lat.toFixed(4) + ", " + a.lng.toFixed(4) + "</small>";
+          li.onclick = () => showAlert(a);
+          listEl.appendChild(li);
+        });
+
+        const still = alerts.find((a) => a.id === selectedId) || alerts[0];
+        showAlert(still);
+      } catch {
+        detail.textContent = "Cannot reach server.";
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 2000);
+  </script>
+</body>
+</html>

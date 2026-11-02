@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SOS</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="user">
+  <main class="user-wrap">
+    <p class="eyebrow">Emergency</p>
+    <h1>Need help?</h1>
+    <p class="sub">This sends your live location to dispatch so they can find you.</p>
+    <button id="sos" type="button">SOS</button>
+    <p id="status" class="status"></p>
+  </main>
+  <script>
+    const btn = document.getElementById("sos");
+    const status = document.getElementById("status");
+
+    function setStatus(text, ok) {
+      status.textContent = text;
+      status.className = "status" + (ok ? " ok" : "");
+    }
+
+    btn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        setStatus("Location is not supported in this browser.");
+        return;
+      }
+
+      btn.disabled = true;
+      setStatus("Getting your location…");
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const res = await fetch("/api/sos", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                accuracy: pos.coords.accuracy,
+              }),
+            });
+            if (!res.ok) throw new Error("bad");
+            setStatus("Sent. Stay where you are if you can — dispatch has your location.", true);
+            btn.textContent = "SENT";
+          } catch {
+            setStatus("Could not reach dispatch. Try again.");
+            btn.disabled = false;
+          }
+        },
+        (err) => {
+          setStatus(err.code === 1
+            ? "Location permission was denied. Allow location and try again."
+            : "Could not get location. Try again.");
+          btn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+    });
+  </script>
+</body>
+</html>
